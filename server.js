@@ -23,6 +23,8 @@ app.post('/races', (req, res) => {
         races[raceId] = {
             initialToken: token,
             lastToken: null,
+            laps: 0, // Initialize lap count
+            startTime: new Date() // Record the start time
         };
 
         res.json({ raceId, racerId: '69edff8d-005a-4f0e-844d-ada0b064d842' });
@@ -50,6 +52,7 @@ app.post('/races/:id/laps', (req, res) => {
 
         // Store the new token for the next lap
         race.lastToken = token;
+        race.laps += 1; // Increment lap count
 
         res.json({ token: responseToken, racerId: '69edff8d-005a-4f0e-844d-ada0b064d842' });
     } catch (error) {
@@ -58,6 +61,32 @@ app.post('/races/:id/laps', (req, res) => {
     }
 });
 
+// Endpoint to get race results
+app.get('/races/:id', (req, res) => {
+    try {
+        const raceId = req.params.id;  // Get the raceId from the request parameters
+
+        if (!races[raceId]) {
+            return res.status(404).json({ message: 'Race not found' });
+        }
+
+        // Retrieve race information
+        const race = races[raceId];
+        const endTime = new Date(); // Record the end time
+        const timeTaken = (endTime - race.startTime) / 1000; // Calculate time taken in seconds
+
+        res.json({
+            raceId: raceId,
+            racerId: '69edff8d-005a-4f0e-844d-ada0b064d842',
+            laps: race.laps,
+            timeTaken: timeTaken + " seconds"
+        });
+    } catch (error) {
+        console.error('Error retrieving race results:', error);
+        res.status(500).send('Internal Server Error');
+    }
+});
+
 app.listen(port, () => {
-    console.log(`Server running on port ${port}.`)
+    console.log(`Server running on port ${port}.`);
 });
