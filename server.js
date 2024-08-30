@@ -1,61 +1,93 @@
 const express = require('express');
-const fetch = require('node-fetch');
-const dotenv = require('dotenv');
-const { v4: uuidv4 } = require('uuid');
-
-dotenv.config();
-
+const { v4: uuidv4 } = require('uuid'); // For generating unique IDs
 const app = express();
+
 app.use(express.json());
+const port = process.env.PORT || 3000;
 
-const myDb = {
-    storedToken: new Map(),
-};
+// In-memory storage for races and their tokens
+const races = {};
 
-const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
-    console.log(Server is running on port ${PORT});
+// Root route
+app.get('/', (req, res) => {
+    res.send('Welcome to the Racer API');
 });
 
-
+// Endpoint to start a race
 app.post('/races', (req, res) => {
-    const receivedToken = req.body.token;
-    const raceId = uuidv4();
+    try {
+        const token = req.body.token;
+        const raceId = uuidv4(); // Generate a unique race ID
 
+        // Store the initial token and race details
+        races[raceId] = {
+            initialToken: token,
+            lastToken: null,
+            laps: 0,
+            startTime: new Date() // Record the start time
+        };
 
-    myDb.storedToken.set(raceId, receivedToken);
-
-
-    const toSend = {
-        id: raceId,
-        racerId: "69edff8d-005a-4f0e-844d-ada0b064d842", //
-    };
-
-    console.log('Race started:', toSend);
-    res.json(toSend);
+        res.json({ raceId, racerId: '69edff8d-005a-4f0e-844d-ada0b064d842' });
+    } catch (error) {
+        console.error('Error starting race:', error);
+        res.status(500).send('Internal Server Error');
+    }
 });
 
-
+// Endpoint to complete a lap
 app.post('/races/:id/laps', (req, res) => {
-    const raceId = req.params.id;
-    const receivedToken = req.body.token;
+    try {
+        const raceId = req.params.id; // Get the raceId from the request parameters
+        const token = req.body.token;
 
-    if (!myDb.storedToken.has(raceId)) {
-        return res.status(404).json({ error: 'Race ID not found' });
+        if (!races[raceId]) {
+            return res.status(404).json({ message: 'Race not found' });
+        }
+
+        // Retrieve race information
+        const race = races[raceId];
+
+        // If this is the first lap, return the initial token
+        const responseToken = race.lastToken || race.initialToken;
+
+        // Store the new token for the next lap and increment lap count
+        race.lastToken = token;
+        race.laps += 1;
+
+        res.json({ token: responseToken, racerId: '69edff8d-005a-4f0e-844d-ada0b064d842' });
+    } catch (error) {
+        console.error('Error completing lap:', error);
+        res.status(500).send('Internal Server Error');
     }
+});
 
+// Endpoint to get race results
+app.get('/races/:id', (req, res) => {
+    try {
+        const raceId = req.params.id; // Get the raceId from the request parameters
 
-    const initialToken = myDb.storedToken.get(raceId);
+        if (!races[raceId]) {
+            return res.status(404).json({ message: 'Race not found' });
+        }
 
+        // Retrieve race information
+        const race = races[raceId];
+        const endTime = new Date(); // Record the end time
+        const timeTaken = (endTime - race.startTime) / 1000; // Calculate time taken in seconds
 
-    myDb.storedToken.set(raceId, receivedToken);
+        res.json({
+            raceId: raceId,
+            racerId: '69edff8d-005a-4f0e-844d-ada0b064d842',
+            laps: race.laps,
+            timeTaken: `${timeTaken} seconds`
+        });
+    } catch (error) {
+        console.error('Error retrieving race results:', error);
+        res.status(500).send('Internal Server Error');
+    }
+});
 
-
-    const toSend = {
-        token: initialToken,
-        racerId: "69edff8d-005a-4f0e-844d-ada0b064d842",
-    };
-
-    console.log('Lap completed:', toSend);
-    res.json(toSend);
+// Start the server
+app.listen(port, () => {
+    console.log(`Server running on port ${port}.`);
 });
