@@ -51,7 +51,7 @@ app.post('/races/:id/laps', (req, res) => {
         // Store the new token for the next lap
         race.lastToken = token;
 
-        res.json({ token: responseToken, racerId: '69edffd8-005a-4f0e-84d4-ada0b064d842' });
+        res.json({ token: responseToken, racerId: '69edff8d-005a-4f0e-844d-ada0b064d842' });
     } catch (error) {
         console.error('Error completing lap:', error);
         res.status(500).send('Internal Server Error');
