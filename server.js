@@ -27,7 +27,8 @@ app.post('/races', (req, res) => {
             startTime: new Date() // Record the start time
         };
 
-        res.json({ raceId, racerId: '69edff8d-005a-4f0e-844d-ada0b064d842' });
+        // Return the raceId as both id and raceId to ensure compatibility
+        res.json({ id: raceId, raceId, racerId: '69edff8d-005a-4f0e-844d-ada0b064d842' });
     } catch (error) {
         console.error('Error starting race:', error);
         res.status(500).send('Internal Server Error');
