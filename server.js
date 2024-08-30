@@ -1,5 +1,5 @@
 const express = require('express');
-const { v4: uuidv4 } = require('uuid');  // Import UUID for unique ID generation
+const { v4: uuidv4 } = require('uuid'); // For generating unique IDs
 const app = express();
 
 app.use(express.json());
@@ -19,11 +19,11 @@ app.post('/races', (req, res) => {
         const token = req.body.token;
         const raceId = uuidv4(); // Generate a unique race ID
 
-        // Store the initial token for this race
+        // Store the initial token and race details
         races[raceId] = {
             initialToken: token,
             lastToken: null,
-            laps: 0, // Initialize lap count
+            laps: 0,
             startTime: new Date() // Record the start time
         };
 
@@ -34,10 +34,10 @@ app.post('/races', (req, res) => {
     }
 });
 
-// Tier 1 & 2: Complete a lap
+// Endpoint to complete a lap
 app.post('/races/:id/laps', (req, res) => {
     try {
-        const raceId = req.params.id;  // Get the raceId from the request parameters
+        const raceId = req.params.id; // Get the raceId from the request parameters
         const token = req.body.token;
 
         if (!races[raceId]) {
@@ -50,9 +50,9 @@ app.post('/races/:id/laps', (req, res) => {
         // If this is the first lap, return the initial token
         const responseToken = race.lastToken || race.initialToken;
 
-        // Store the new token for the next lap
+        // Store the new token for the next lap and increment lap count
         race.lastToken = token;
-        race.laps += 1; // Increment lap count
+        race.laps += 1;
 
         res.json({ token: responseToken, racerId: '69edff8d-005a-4f0e-844d-ada0b064d842' });
     } catch (error) {
@@ -64,7 +64,7 @@ app.post('/races/:id/laps', (req, res) => {
 // Endpoint to get race results
 app.get('/races/:id', (req, res) => {
     try {
-        const raceId = req.params.id;  // Get the raceId from the request parameters
+        const raceId = req.params.id; // Get the raceId from the request parameters
 
         if (!races[raceId]) {
             return res.status(404).json({ message: 'Race not found' });
@@ -79,7 +79,7 @@ app.get('/races/:id', (req, res) => {
             raceId: raceId,
             racerId: '69edff8d-005a-4f0e-844d-ada0b064d842',
             laps: race.laps,
-            timeTaken: timeTaken + " seconds"
+            timeTaken: `${timeTaken} seconds`
         });
     } catch (error) {
         console.error('Error retrieving race results:', error);
@@ -87,6 +87,7 @@ app.get('/races/:id', (req, res) => {
     }
 });
 
+// Start the server
 app.listen(port, () => {
     console.log(`Server running on port ${port}.`);
 });
