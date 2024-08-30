@@ -28,7 +28,7 @@ app.post('/races', (req, res) => {
 
     const toSend = {
         id: raceId,
-        racerId: "2532c7d5-511b-466a-a8b7-bb6c797efa36", //
+        racerId: "69edff8d-005a-4f0e-844d-ada0b064d842", //
     };
 
     console.log('Race started:', toSend);
@@ -53,7 +53,7 @@ app.post('/races/:id/laps', (req, res) => {
 
     const toSend = {
         token: initialToken,
-        racerId: "2532c7d5-511b-466a-a8b7-bb6c797efa36",
+        racerId: "69edff8d-005a-4f0e-844d-ada0b064d842",
     };
 
     console.log('Lap completed:', toSend);
