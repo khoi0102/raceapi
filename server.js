@@ -24,6 +24,7 @@ app.post('/races', (req, res) => {
             initialToken: token,
             lastToken: null,
             laps: 0,
+            tokens: [],  // Store tokens for each lap
             startTime: new Date() // Record the start time
         };
 
@@ -51,7 +52,8 @@ app.post('/races/:id/laps', (req, res) => {
         // If this is the first lap, return the initial token
         const responseToken = race.lastToken || race.initialToken;
 
-        // Store the new token for the next lap and increment lap count
+        // Store the new token for the next lap
+        race.tokens.push(token);
         race.lastToken = token;
         race.laps += 1;
 
@@ -80,6 +82,7 @@ app.get('/races/:id', (req, res) => {
             raceId: raceId,
             racerId: '69edff8d-005a-4f0e-844d-ada0b064d842',
             laps: race.laps,
+            tokens: race.tokens,  // Return all tokens if needed
             timeTaken: `${timeTaken} seconds`
         });
     } catch (error) {
