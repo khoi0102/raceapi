@@ -49,14 +49,15 @@ app.post('/races/:id/laps', (req, res) => {
         // Retrieve race information
         const race = races[raceId];
 
-        // If this is the first lap, return the initial token
-        const responseToken = race.lastToken || race.initialToken;
+        // If this is the first lap, use the initial token
+        const responseToken = race.tokens.length === 0 ? race.initialToken : race.tokens[race.tokens.length - 1];
 
         // Store the new token for the next lap
         race.tokens.push(token);
         race.lastToken = token;
         race.laps += 1;
 
+        // Return the token from the previous lap
         res.json({ token: responseToken, racerId: '69edff8d-005a-4f0e-844d-ada0b064d842' });
     } catch (error) {
         console.error('Error completing lap:', error);
